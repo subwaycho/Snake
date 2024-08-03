@@ -116,8 +116,10 @@ function draw() {
     for (let i = 0; i < snake.length; i++) {
         if (i === 0) {
             drawSnakeHead(snake[i].x, snake[i].y, direction);
+        } else if (i === snake.length - 1) {
+            drawSnakeTail(snake[i].x, snake[i].y, snake[snake.length - 2]);
         } else {
-            drawSnakeBody(snake[i].x, snake[i].y, i);
+            drawSnakeBody(snake[i].x, snake[i].y, snake[i - 1], snake[i + 1]);
         }
     }
 
@@ -128,7 +130,7 @@ function draw() {
 }
 
 function drawSnakeHead(x, y, direction) {
-    ctx.fillStyle = "#4a90e2";
+    ctx.fillStyle = "#4a90e2"; // Use the same color for the head
     ctx.beginPath();
     ctx.arc(x + box / 2, y + box / 2, box / 2, 0, 2 * Math.PI);
     ctx.fill();
@@ -169,13 +171,34 @@ function drawSnakeHead(x, y, direction) {
     ctx.fill();
 }
 
-function drawSnakeBody(x, y, index) {
-    ctx.fillStyle = "#4a90e2";
+function drawSnakeBody(x, y, prev, next) {
+    ctx.fillStyle = "#4a90e2"; // Same color as the head and tail
+    ctx.fillRect(x, y, box, box);
+
+    // Draw connections between segments
+    if (prev && next) {
+        const anglePrev = Math.atan2(prev.y - y, prev.x - x);
+        const angleNext = Math.atan2(next.y - y, next.x - x);
+        const angleDiff = angleNext - anglePrev;
+
+        if (Math.abs(angleDiff) > Math.PI) {
+            ctx.beginPath();
+            ctx.arc(x + box / 2, y + box / 2, box / 2, anglePrev, angleNext);
+            ctx.strokeStyle = "#4a90e2";
+            ctx.lineWidth = box;
+            ctx.stroke();
+        }
+    }
+}
+
+function drawSnakeTail(x, y, prev) {
+    ctx.fillStyle = "#4a90e2"; // Same color as the head and body
     ctx.beginPath();
-    if (index === snake.length - 1) { // Tail part
-        ctx.arc(x + box / 2, y + box / 2, box / 2, 0, 2 * Math.PI);
+    if (prev) {
+        const angle = Math.atan2(y - prev.y, x - prev.x);
+        ctx.arc(x + box / 2, y + box / 2, box / 2, angle - Math.PI / 4, angle + Math.PI / 4);
     } else {
-        ctx.fillRect(x, y, box, box);
+        ctx.arc(x + box / 2, y + box / 2, box / 2, 0, 2 * Math.PI);
     }
     ctx.fill();
 }
